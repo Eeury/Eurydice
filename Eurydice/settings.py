@@ -1,23 +1,23 @@
 from pathlib import Path
 import os
-
+from datetime import timedelta
 import dj_database_url
-from decouple import config
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env")
 
 
-SECRET_KEY = config("DJANGO_SECRET_KEY", default="dev-insecure-key")
+load_dotenv()
 
-DEBUG = config("DJANGO_DEBUG", default=True, cast=bool)
+
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-insecure-key")
+DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
 
 ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'eurydice.onrender.com',
-    os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+    "localhost",
+    "127.0.0.1",
+    "eurydice.onrender.com",
+    os.getenv("RENDER_EXTERNAL_HOSTNAME"),
 ]
 
 
@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "shop",
 ]
 
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -47,6 +48,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "Eurydice.urls"
+
 
 TEMPLATES = [
     {
@@ -67,39 +69,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "Eurydice.wsgi.application"
 
-
 DATABASE_URL = os.getenv("DATABASE_URL")
 DATABASES = {
-    "default": dj_database_url.config(
-        default=DATABASE_URL,
-        conn_max_age=600,
-        ssl_require=True
-    )
+    "default": dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
 }
 
-
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
 USE_TZ = True
 
 
@@ -111,30 +96,21 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-CLOUDINARY_URL = config("CLOUDINARY_URL", default="")
-if CLOUDINARY_URL:
+
+if os.getenv("CLOUDINARY_URL"):
     CLOUDINARY_STORAGE = {
         "CLOUD_NAME": os.getenv("CLOUDINARY_CLOUD_NAME"),
         "API_KEY": os.getenv("CLOUDINARY_API_KEY"),
-        "API_SECRET": os.getenv("CLOUDINARY_API_SECRET")
+        "API_SECRET": os.getenv("CLOUDINARY_API_SECRET"),
     }
     DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-    MEDIA_URL = config("CLOUDINARY_MEDIA_URL", default=MEDIA_URL)
 
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/"
-
-# DRF and SimpleJWT
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     )
 }
-
-from datetime import timedelta  # noqa: E402
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
@@ -143,4 +119,7 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
 }
 
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
