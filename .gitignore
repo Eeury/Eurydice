@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+
+# Environments
+.env
+.venv/
+venv/
+ENV/
+
+# Django
+staticfiles/
+media/
+db.sqlite3
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Node/npm (if any front-end assets later)
+node_modules/
+
+# Migrations cache (keep actual migration files)
+*.pyc
+
+

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}EEury - Products{% endblock %}
+
+{% block content %}
+<section class="section-container">
+  <h1 class="page-heading">Shop All Sustainable Goods</h1>
+  <p style="text-align:center; font-size:1.05em; color:#555;">Browse our curated selection of ethical and eco-conscious products by category.</p>
+
+  <div class="category-grid">
+    {% for c in categories %}
+      <a class="category-card" href="{% url 'shop:category_detail' c.slug %}">
+        {% if c.image %}
+          <img src="{{ c.image.url }}" alt="{{ c.name }}" class="category-image" />
+        {% else %}
+          <div class="category-image" style="display:flex; align-items:center; justify-content:center; background:#eaeaea; color:#888;">No Image</div>
+        {% endif %}
+        <div class="category-name">{{ c.name }}</div>
+      </a>
+    {% empty %}
+      <p class="muted" style="grid-column: 1 / -1; text-align:center;">No categories yet.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section-container">
+  <h2 class="section-heading">All Products</h2>
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:30px;">
+    {% for product in products %}
+      <div class="light-card" id="{{ product.slug }}">
+        {% if product.main_image %}
+          <img class="product-image" src="{{ product.main_image.url }}" alt="{{ product.name }}" />
+        {% elif product.images.first %}
+          <img class="product-image" src="{{ product.images.first.image.url }}" alt="{{ product.name }}" />
+        {% else %}
+          <div class="placeholder" style="height:200px; display:flex; align-items:center; justify-content:center; border:1px dashed var(--border); border-radius:8px;">No Image</div>
+        {% endif %}
+        <h3 style="color:var(--primary); margin-bottom:10px;">{{ product.name }}</h3>
+        <p class="price" style="margin:0 0 8px 0; color:var(--primary); font-weight:700;">{{ product.price }}</p>
+        <p class="desc" style="margin-bottom:15px;">{{ product.description|truncatechars:120 }}</p>
+        <div class="actions" style="display:flex; gap:10px; justify-content:center;">
+          <a class="green-button" href="{% url 'shop:cart_add' product.slug %}">Add to cart</a>
+          <a class="green-button" href="{% url 'shop:cart_add' product.slug %}">Buy now</a>
+        </div>
+      </div>
+    {% empty %}
+      <p class="muted">No products available.</p>
+    {% endfor %}
+  </div>
+  
+</section>
+{% endblock %}
+
+

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}EEury - {{ category.name }}{% endblock %}
+
+{% block content %}
+<section class="section-container">
+  <h1 class="page-heading">{{ category.name }}</h1>
+  {% if category.description %}<p style="text-align:center; color:#555; max-width:900px; margin:0 auto;">{{ category.description }}</p>{% endif %}
+
+  <div class="product-grid">
+    {% for product in products %}
+      <div class="listing-card">
+        <div class="image-slideshow">
+          {% if product.main_image %}
+            <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="product-image" />
+          {% endif %}
+          {% for img in product.images.all %}
+            <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}" class="product-image" />
+          {% endfor %}
+        </div>
+        <h3 style="margin:0 20px 5px 20px;">{{ product.name }}</h3>
+        <p style="font-size:.95em; color:#777; margin:0 20px 10px 20px; min-height:40px;">{{ product.description|default:''|truncatechars:120 }}</p>
+        <p class="product-price">{{ product.price }}</p>
+        <div class="button-group">
+          <a href="{% url 'shop:cart_add' product.slug %}" class="action-button buy-now-btn"><i class="fas fa-bolt"></i> Buy Now</a>
+          <a href="{% url 'shop:cart_add' product.slug %}" class="action-button add-to-cart-btn"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+        </div>
+      </div>
+    {% empty %}
+      <p class="muted">No products in this category.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+
+

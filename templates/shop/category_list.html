@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}EEury - Categories{% endblock %}
+
+{% block content %}
+<section class="categories-grid">
+  <h2>Categories</h2>
+  <div class="grid-6">
+    {% for c in categories %}
+      <a class="category-card" href="{% url 'shop:category_detail' c.slug %}">
+        {% if c.image %}<img src="{{ c.image.url }}" alt="{{ c.name }}" />{% endif %}
+        <h3>{{ c.name }}</h3>
+      </a>
+    {% empty %}
+      <p class="muted">No categories yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+
+
