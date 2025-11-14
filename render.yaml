@@ -13,12 +13,11 @@ services:
       - key: DJANGO_DEBUG
         value: "False"
       - key: DJANGO_ALLOWED_HOSTS
-        value: "eurydice-web.onrender.com,.onrender.com"
+        value: "eurydice-web.onrender.com,.onrender.com,localhost"
       - key: DATABASE_URL
         value: "YOUR_NEON_DATABASE_URL_HERE"
       - key: CLOUDINARY_URL
         sync: false
-  
       - key: DJANGO_SUPERUSER_USERNAME
         sync: false
       - key: DJANGO_SUPERUSER_EMAIL
@@ -28,20 +27,23 @@ services:
     autoDeploy: true
 
     postDeploy:
-  - python manage.py migrate --noinput
-  - >
-    python manage.py shell -c "
-    from django.contrib.auth import get_user_model;
-    User = get_user_model();
-    username = '$DJANGO_SUPERUSER_USERNAME';
-    email = '$DJANGO_SUPERUSER_EMAIL';
-    password = '$DJANGO_SUPERUSER_PASSWORD';
-    if not User.objects.filter(username=username).exists():
-        User.objects.create_superuser(username, email, password);
-        print(f'Superuser {username} created');
-    else:
-        user = User.objects.get(username=username);
-        user.set_password(password);
-        user.save();
-        print(f'Password updated for {username}');
-    "
+      - python manage.py migrate --noinput
+      - >
+        python manage.py shell << 'EOF'
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        username = "${DJANGO_SUPERUSER_USERNAME}"
+        email = "${DJANGO_SUPERUSER_EMAIL}"
+        password = "${DJANGO_SUPERUSER_PASSWORD}"
+        
+        if not User.objects.filter(username=username).exists():
+            User.objects.create_superuser(username, email, password)
+            print(f"SUPERUSER CREATED: {username}")
+        else:
+            user = User.objects.get(username=username)
+            user.set_password(password)
+            user.is_staff = True
+            user.is_superuser = True
+            user.save()
+            print(f"PASSWORD RESET: {username}")
+        EOF
