@@ -8,7 +8,10 @@ services:
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
 
-    startCommand: gunicorn Eurydice.wsgi
+    startCommand: |
+      python manage.py migrate --noinput
+      python create_superuser_once.py
+      gunicorn Eurydice.wsgi
 
     envVars:
       - key: DJANGO_SECRET_KEY
