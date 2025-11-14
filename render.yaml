@@ -3,10 +3,13 @@ services:
     name: eurydice-web
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
-    startCommand: |
-      python manage.py migrate --noinput && \
-      gunicorn Eurydice.wsgi
+
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+
+    startCommand: gunicorn Eurydice.wsgi
+
     envVars:
       - key: DJANGO_SECRET_KEY
         generateValue: true
@@ -15,7 +18,7 @@ services:
       - key: DJANGO_ALLOWED_HOSTS
         value: "eurydice-web.onrender.com,.onrender.com,localhost"
       - key: DATABASE_URL
-        value: "YOUR_NEON_DATABASE_URL_HERE"
+        value: "PASTE_YOUR_REAL_NEON_DATABASE_URL_HERE"
       - key: CLOUDINARY_URL
         sync: false
       - key: DJANGO_SUPERUSER_USERNAME
@@ -24,26 +27,22 @@ services:
         sync: false
       - key: DJANGO_SUPERUSER_PASSWORD
         sync: false
+
     autoDeploy: true
 
-    postDeploy:
+    postdeploy:
       - python manage.py migrate --noinput
-      - >
-        python manage.py shell << 'EOF'
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        username = "${DJANGO_SUPERUSER_USERNAME}"
-        email = "${DJANGO_SUPERUSER_EMAIL}"
-        password = "${DJANGO_SUPERUSER_PASSWORD}"
-        
-        if not User.objects.filter(username=username).exists():
-            User.objects.create_superuser(username, email, password)
-            print(f"SUPERUSER CREATED: {username}")
-        else:
-            user = User.objects.get(username=username)
-            user.set_password(password)
-            user.is_staff = True
-            user.is_superuser = True
-            user.save()
-            print(f"PASSWORD RESET: {username}")
-        EOF
+      - |
+          python manage.py createsuperuser \
+          --noinput \
+          --username "$DJANGO_SUPERUSER_USERNAME" \
+          --email "$DJANGO_SUPERUSER_EMAIL" || true
+      - |
+          python manage.py shell -c "
+from django.contrib.auth import get_user_model
+User = get_user_model()
+u = User.objects.get(username='$DJANGO_SUPERUSER_USERNAME')
+u.set_password('$DJANGO_SUPERUSER_PASSWORD')
+u.save()
+print('Superuser password set successfully.')
+"
