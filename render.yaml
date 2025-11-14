@@ -28,9 +28,20 @@ services:
     autoDeploy: true
 
     postDeploy:
-      - python manage.py migrate --noinput
-      - >
-        python manage.py createsuperuser --noinput
-        --username $DJANGO_SUPERUSER_USERNAME
-        --email $DJANGO_SUPERUSER_EMAIL
-        2>/dev/null || echo "Superuser already exists or failed (safe to ignore)"
+  - python manage.py migrate --noinput
+  - >
+    python manage.py shell -c "
+    from django.contrib.auth import get_user_model;
+    User = get_user_model();
+    username = '$DJANGO_SUPERUSER_USERNAME';
+    email = '$DJANGO_SUPERUSER_EMAIL';
+    password = '$DJANGO_SUPERUSER_PASSWORD';
+    if not User.objects.filter(username=username).exists():
+        User.objects.create_superuser(username, email, password);
+        print(f'Superuser {username} created');
+    else:
+        user = User.objects.get(username=username);
+        user.set_password(password);
+        user.save();
+        print(f'Password updated for {username}');
+    "
