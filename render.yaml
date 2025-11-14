@@ -13,9 +13,24 @@ services:
       - key: DJANGO_DEBUG
         value: "False"
       - key: DJANGO_ALLOWED_HOSTS
-        value: "eurydice-web.onrender.com"
+        value: "eurydice-web.onrender.com,.onrender.com"
       - key: DATABASE_URL
         value: "YOUR_NEON_DATABASE_URL_HERE"
       - key: CLOUDINARY_URL
         sync: false
+  
+      - key: DJANGO_SUPERUSER_USERNAME
+        sync: false
+      - key: DJANGO_SUPERUSER_EMAIL
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
     autoDeploy: true
+
+    postDeploy:
+      - python manage.py migrate --noinput
+      - >
+        python manage.py createsuperuser --noinput
+        --username $DJANGO_SUPERUSER_USERNAME
+        --email $DJANGO_SUPERUSER_EMAIL
+        2>/dev/null || echo "Superuser already exists or failed (safe to ignore)"
