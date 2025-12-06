@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 
 {% block title %}EEury - Checkout{% endblock %}
 
@@ -30,7 +30,8 @@
       </div>
     </div>
 
-    <h3 style="color: var(--text); font-size: 1.2em; margin-bottom: 15px;">How would you like to receive your order?</h3>
+    <h3 style="color: var(--text); font-size: 1.2em; margin-bottom: 15px;">How would you like to receive your order?
+    </h3>
     <div class="delivery-options">
       <div id="delivery-btn" class="delivery-option-btn active" onclick="selectDelivery('delivery')">
         <i class="fas fa-truck"></i> Delivery
@@ -68,7 +69,18 @@
     <button class="green-button">Place Order ({{ total }})</button>
   </div>
 </section>
+
+<script>
+  window.cartItems = [
+    {% for item in items %}
+  {
+    name: "{{ item.product.name|escapejs }}",
+      quantity: { { item.quantity } },
+    price: "{{ item.product.price }}",
+      lineTotal: "{{ item.line_total }}"
+  } {% if not forloop.last %}, {% endif %}
+  {% endfor %}
+  ];
+</script>
 <script src="{% static 'js/checkout.js' %}"></script>
 {% endblock %}
-
-

@@ -118,10 +118,17 @@ def checkout(request: HttpRequest) -> HttpResponse:
     products = Product.objects.filter(slug__in=product_slugs)
     subtotal = Decimal("0.00")
     item_count = 0
+    items = []
     for product in products:
         quantity = int(cart.get(product.slug, 0))
         item_count += quantity
-        subtotal += product.price * quantity
+        line_total = product.price * quantity
+        subtotal += line_total
+        items.append({
+            "product": product,
+            "quantity": quantity,
+            "line_total": line_total,
+        })
     shipping_initial = Decimal("10.00") if subtotal > 0 else Decimal("0.00")
     tax = (subtotal * Decimal("0.07")).quantize(Decimal("0.01"))
     total = (subtotal + shipping_initial + tax).quantize(Decimal("0.01"))
@@ -131,6 +138,7 @@ def checkout(request: HttpRequest) -> HttpResponse:
         "shipping_initial": shipping_initial.quantize(Decimal("0.01")),
         "tax": tax,
         "total": total,
+        "items": items,
     }
     return render(request, "shop/checkout.html", context)
 
