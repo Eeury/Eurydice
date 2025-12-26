@@ -17,7 +17,12 @@ urlpatterns = [
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve media files locally when not using Cloudinary (shared hosting, development)
+# In production with shared hosting, configure your web server (Apache/Nginx) to serve /media/
+# For development or when not using Cloudinary, Django will serve media files
+USE_CLOUDINARY = bool(getattr(settings, 'USE_CLOUDINARY', False))
+if settings.DEBUG or not USE_CLOUDINARY:
+    if hasattr(settings, 'MEDIA_ROOT') and settings.MEDIA_ROOT:
+        urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

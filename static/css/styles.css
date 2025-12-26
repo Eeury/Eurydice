@@ -32,9 +32,10 @@ body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-s
 .logo { font-weight:700; font-size:20px; text-decoration:none; display:flex; align-items:center; gap:8px; color:#fff; }
 .logo-badge { background:#ffffff; border-radius:999px; padding:10px 16px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(0,0,0,0.2); }
 .logo img { height:40px; width:auto; display:block; }
-.btn { display:inline-block; padding:8px 14px; border:1px solid #ffffff; border-radius:8px; text-decoration:none; color:var(--primary); background:#ffffff; font-weight:600; transition: all 0.3s ease; }
-.btn-primary { background:#0a7713; color:#0f5132; border-color:#020a04; transition: all 0.3s ease; }
-.btn:hover, .btn-primary:hover { background:var(--primary); color:#ffffff; transform: scale(1.05); }
+.btn { display:inline-block; padding:8px 14px; border:2px solid #ffffff; border-radius:8px; text-decoration:none; color:#ffffff; background:transparent; font-weight:600; transition: all 0.3s ease; }
+.btn-primary { background:var(--primary); color:#ffffff; border:2px solid var(--primary); transition: all 0.3s ease; }
+.btn:hover { background:#ffffff; color:var(--primary); border-color:#ffffff; transform: scale(1.05); }
+.btn-primary:hover { background:#006037; border-color:#006037; color:#ffffff; transform: scale(1.05); }
 .btn-danger { background:#b02a37; color:#fff; border-color:#b02a37; }
 .icon { margin-left:8px; text-decoration:none; font-size:18px; }
 .messages { padding:8px 24px; }

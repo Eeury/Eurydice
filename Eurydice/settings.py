@@ -28,12 +28,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "whitenoise.runserver_nostatic",
-    "cloudinary_storage",
     "django.contrib.staticfiles",
-    "cloudinary",
     "rest_framework",
     "shop",
 ]
+
+# Conditionally add Cloudinary apps only if CLOUDINARY_URL is set
+if os.getenv("CLOUDINARY_URL"):
+    INSTALLED_APPS.insert(-1, "cloudinary_storage")
+    INSTALLED_APPS.insert(-1, "cloudinary")
 
 
 MIDDLEWARE = [
@@ -93,17 +96,23 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# Media files configuration - Cloudinary for production (Render), local for shared hosting
+USE_CLOUDINARY = bool(os.getenv("CLOUDINARY_URL"))
 
-
-if os.getenv("CLOUDINARY_URL"):
+if USE_CLOUDINARY:
+    # Use Cloudinary for media storage (production on Render)
     CLOUDINARY_STORAGE = {
         "CLOUD_NAME": os.getenv("CLOUDINARY_CLOUD_NAME"),
         "API_KEY": os.getenv("CLOUDINARY_API_KEY"),
         "API_SECRET": os.getenv("CLOUDINARY_API_SECRET"),
     }
     DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+    # Cloudinary will handle MEDIA_URL automatically
+    MEDIA_URL = os.getenv("CLOUDINARY_MEDIA_URL", "")
+else:
+    # Fallback to local file storage (shared hosting, development)
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
 
 
 REST_FRAMEWORK = {
