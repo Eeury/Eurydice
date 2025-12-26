@@ -124,3 +124,15 @@ class FlashSaleItem(TimestampedModel):
         return f"{self.flash_sale.title} - {self.product.name}"
 
 
+class Review(TimestampedModel):
+    name = models.CharField(max_length=100)
+    comment = models.TextField(max_length=500)
+    is_approved = models.BooleanField(default=True)
+    
+    class Meta:
+        ordering = ["-created_at"]
+    
+    def __str__(self) -> str:
+        return f"Review by {self.name}"
+
+

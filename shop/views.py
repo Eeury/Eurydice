@@ -7,13 +7,15 @@ from django.contrib import messages
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.http import require_http_methods
+import json
 
 from .forms import CustomUserCreationForm
-from .models import Category, FlashSale, Product, Promotion
+from .models import Category, FlashSale, Product, Promotion, Review
 
 
 def _get_cart(session) -> Dict[str, int]:
@@ -35,11 +37,13 @@ def _build_home_context(
     flash_sales = FlashSale.objects.filter(is_active=True, start_at__lte=now, end_at__gte=now).order_by("-start_at")[:3]
     hot_products = Product.objects.filter(is_active=True).order_by("-created_at")[:12]
     categories = Category.objects.filter(is_active=True).order_by("name")
+    reviews = Review.objects.filter(is_approved=True).order_by("-created_at")[:3]
     context: Dict[str, object] = {
         "promotions": promotions,
         "flash_sales": flash_sales,
         "hot_products": hot_products,
         "categories": categories,
+        "reviews": reviews,
         "login_form": login_form or AuthenticationForm(request),
         "signup_form": signup_form or CustomUserCreationForm(),
     }
@@ -186,5 +190,36 @@ def signup(request: HttpRequest) -> HttpResponse:
     context["show_signup_modal"] = True
     context["login_next"] = request.GET.get("next", "")
     return render(request, "shop/home.html", context)
+
+
+@require_http_methods(["POST"])
+def add_review(request: HttpRequest) -> JsonResponse:
+    """Handle AJAX request to add a new review."""
+    try:
+        data = json.loads(request.body)
+        name = data.get("name", "").strip()
+        comment = data.get("comment", "").strip()
+        
+        if not name or not comment:
+            return JsonResponse({"success": False, "error": "Name and comment are required."}, status=400)
+        
+        if len(comment) > 500:
+            return JsonResponse({"success": False, "error": "Comment must be 500 characters or less."}, status=400)
+        
+        review = Review.objects.create(name=name, comment=comment, is_approved=True)
+        
+        return JsonResponse({
+            "success": True,
+            "review": {
+                "id": review.id,
+                "name": review.name,
+                "comment": review.comment,
+                "created_at": review.created_at.strftime("%B %d, %Y"),
+            }
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON data."}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
