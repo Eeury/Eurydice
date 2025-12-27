@@ -173,11 +173,12 @@ def signup(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Account created. You can log in now.")
-            redirect_url = reverse("login")
+            user = form.save()
+            auth_login(request, user)
+            messages.success(request, "Account created successfully!")
+            redirect_url = "shop:home"
             if request.POST.get("next"):
-                redirect_url += f"?next={request.POST['next']}"
+                redirect_url = request.POST['next']
             return redirect(redirect_url)
         messages.error(request, "Please correct the highlighted errors and try again.")
         context = _build_home_context(request, signup_form=form)

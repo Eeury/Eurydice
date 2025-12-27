@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from django.db import models
 from django.utils.text import slugify
+from cloudinary.models import CloudinaryField
 
 
 class TimestampedModel(models.Model):
@@ -15,7 +16,7 @@ class TimestampedModel(models.Model):
 class Category(TimestampedModel):
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=220, unique=True)
-    image = models.ImageField(upload_to="categories/", blank=True, null=True)
+    image = CloudinaryField('image', blank=True, null=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
 
@@ -39,7 +40,7 @@ class Product(TimestampedModel):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
-    main_image = models.ImageField(upload_to="products/main/", blank=True, null=True)
+    main_image = CloudinaryField('image', blank=True, null=True)
 
     class Meta:
         ordering = ["name"]
@@ -55,7 +56,7 @@ class Product(TimestampedModel):
 
 class ProductImage(TimestampedModel):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
-    image = models.ImageField(upload_to="products/gallery/")
+    image = CloudinaryField('image')
     alt_text = models.CharField(max_length=255, blank=True)
     is_primary = models.BooleanField(default=False)
     sort_order = models.PositiveIntegerField(default=0)
@@ -72,7 +73,7 @@ class Promotion(TimestampedModel):
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=280, unique=True)
     description = models.TextField(blank=True)
-    image = models.ImageField(upload_to="promotions/", blank=True, null=True)
+    image = CloudinaryField('image', blank=True, null=True)
     discount_percent = models.DecimalField(max_digits=5, decimal_places=2, help_text="Percentage discount, e.g. 15.00 for 15%")
     start_at = models.DateTimeField()
     end_at = models.DateTimeField()
@@ -94,7 +95,7 @@ class FlashSale(TimestampedModel):
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=280, unique=True)
     description = models.TextField(blank=True)
-    image = models.ImageField(upload_to="flash_sales/", blank=True, null=True)
+    image = CloudinaryField('image', blank=True, null=True)
     start_at = models.DateTimeField()
     end_at = models.DateTimeField()
     is_active = models.BooleanField(default=True)

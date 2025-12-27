@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     {% load static %}
     <meta charset="UTF-8" />
@@ -10,6 +11,7 @@
     <script defer src="{% static 'js/main.js' %}"></script>
     <script defer src="{% static 'js/auth.js' %}"></script>
 </head>
+
 <body>
     <header class="site-header">
         <div class="nav">
@@ -26,26 +28,35 @@
                 {% if request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'signup' %}
                 <div class="nav-cats">
                     {% for c in nav_categories %}
-                        <a href="{% url 'shop:category_detail' c.slug %}">{{ c.name }}</a>
+                    <a href="{% url 'shop:category_detail' c.slug %}">{{ c.name }}</a>
                     {% empty %}
-                        <span class="muted">Categories</span>
+                    <span class="muted">Categories</span>
                     {% endfor %}
                 </div>
                 {% endif %}
             </nav>
             <div class="nav-right">
+                {% if user.is_authenticated %}
+                <span style="color:#fff; margin-right:15px; font-weight:600;">Hi, {{ user.username }}</span>
+                <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn"
+                        style="cursor:pointer; font-family:inherit; font-size:inherit;">Log out</button>
+                </form>
+                {% else %}
                 <a class="btn" id="loginBtn" href="{% url 'login' %}">Log in</a>
                 <a class="btn btn-primary" id="signupBtn" href="{% url 'shop:signup' %}">Sign up</a>
+                {% endif %}
             </div>
         </div>
     </header>
 
     {% if messages %}
-        <div class="messages">
-            {% for m in messages %}
-                <div class="message {{ m.tags }}">{{ m }}</div>
-            {% endfor %}
-        </div>
+    <div class="messages">
+        {% for m in messages %}
+        <div class="message {{ m.tags }}">{{ m }}</div>
+        {% endfor %}
+    </div>
     {% endif %}
 
     <main>
@@ -72,6 +83,5 @@
         </div>
     </footer>
 </body>
+
 </html>
-
-
