@@ -97,20 +97,33 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Media files configuration - Cloudinary for production (Render), local for shared hosting
-USE_CLOUDINARY = bool(os.getenv("CLOUDINARY_URL"))
+CLOUDINARY_URL = os.getenv("CLOUDINARY_URL")
+USE_CLOUDINARY = bool(CLOUDINARY_URL)
 
 if USE_CLOUDINARY:
     # Use Cloudinary for media storage (production on Render)
+    # Parse CLOUDINARY_URL if provided, otherwise use individual env vars
+    cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME", "")
+    api_key = os.getenv("CLOUDINARY_API_KEY", "")
+    api_secret = os.getenv("CLOUDINARY_API_SECRET", "")
+    
+    if CLOUDINARY_URL:
+        # CLOUDINARY_URL format: cloudinary://api_key:api_secret@cloud_name
+        import re
+        match = re.match(r'cloudinary://([^:]+):([^@]+)@([^/]+)', CLOUDINARY_URL)
+        if match:
+            api_key, api_secret, cloud_name = match.groups()
+    
     CLOUDINARY_STORAGE = {
-        "CLOUD_NAME": os.getenv("CLOUDINARY_CLOUD_NAME"),
-        "API_KEY": os.getenv("CLOUDINARY_API_KEY"),
-        "API_SECRET": os.getenv("CLOUDINARY_API_SECRET"),
+        "CLOUD_NAME": cloud_name,
+        "API_KEY": api_key,
+        "API_SECRET": api_secret,
     }
+    
     DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-    # Cloudinary will handle MEDIA_URL automatically
-    MEDIA_URL = os.getenv("CLOUDINARY_MEDIA_URL", "")
+    MEDIA_URL = "/media/" 
+    MEDIA_ROOT = ""  
 else:
-    # Fallback to local file storage (shared hosting, development)
     MEDIA_URL = "/media/"
     MEDIA_ROOT = BASE_DIR / "media"
 
